@@ -7,6 +7,7 @@ export const useGlobalStore = defineStore('global', () => {
   const questions = ref<Question[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
+  const isGameActive = ref(false);
 
   async function load() {
     if (questions.value.length || loading.value) return;
@@ -21,5 +22,11 @@ export const useGlobalStore = defineStore('global', () => {
     }
   }
 
-  return { questions, loading, error, load };
+  return {
+    questions,
+    loading,
+    error,
+    isGameActive,
+    load
+  };
 });

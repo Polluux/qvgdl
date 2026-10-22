@@ -25,9 +25,9 @@ function parseDifficulty(raw: string): DIFFICULTY {
 }
 
 function rowToQuestion(row: string[]): Question | null {
-  const [text, correct, w1, w2, w3, diffRaw] = row.map((cell) => (cell ?? '').trim());
+  const [text, correct, w1, w2, w3, diffRaw, active] = row.map((cell) => (cell ?? '').trim());
   const difficulty = parseDifficulty(diffRaw ?? '');
-  if (!text || !correct || !w1 || !w2 || !w3 || !difficulty) {
+  if (!text || !correct || !w1 || !w2 || !w3 || !difficulty || active !== 'TRUE') {
     return null;
   }
 

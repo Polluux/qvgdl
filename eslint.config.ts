@@ -49,6 +49,7 @@ export default defineConfigWithVueTs(
       // Pas de submit implicite : sans attribut type, un <button> dans un <form> vaut submit, donc son
       // @click s'exécute puis le formulaire part en soumission native (rechargement de page).
       'vue/html-button-has-type': 'error',
+      'vue/html-indent': ['warn', 2],
       'vue/html-self-closing': 'off',
       'vue/multi-word-component-names': 'off',
       'vue/no-v-html': 'off',
@@ -63,6 +64,8 @@ export default defineConfigWithVueTs(
       '@stylistic/comma-dangle': ['error', 'never'],
       '@stylistic/comma-spacing': ['error', { before: false, after: true }],
       '@stylistic/function-call-spacing': ['error', 'never'],
+      // SwitchCase à 1 pour coller à Prettier, qui indente les `case` sous le `switch`.
+      '@stylistic/indent': ['warn', 2, { SwitchCase: 1 }],
       '@stylistic/key-spacing': ['error', { beforeColon: false, afterColon: true, mode: 'strict' }],
       '@stylistic/no-multi-spaces': 'error',
       '@stylistic/no-multiple-empty-lines': ['error', { max: 1, maxBOF: 0, maxEOF: 0 }],
