@@ -25,7 +25,7 @@ function parseDifficulty(raw: string): DIFFICULTY {
 }
 
 function rowToQuestion(row: string[]): Question | null {
-  const [text, correct, w1, w2, w3, diffRaw, active] = row.map((cell) => (cell ?? '').trim());
+  const [text, correct, w1, w2, w3, diffRaw, note, active] = row.map((cell) => (cell ?? '').trim());
   const difficulty = parseDifficulty(diffRaw ?? '');
   if (!text || !correct || !w1 || !w2 || !w3 || !difficulty || active !== 'TRUE') {
     return null;
@@ -34,8 +34,13 @@ function rowToQuestion(row: string[]): Question | null {
   return {
     id: uuid(),
     text,
-    correctAnswer: correct,
-    wrongAnswers: [w1, w2, w3],
+    answers: [
+      { label: correct, correct: true },
+      { label: w1, correct: false },
+      { label: w2, correct: false },
+      { label: w3, correct: false }
+    ],
+    note: note || '',
     difficulty
   };
 }
