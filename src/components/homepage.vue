@@ -1,5 +1,5 @@
 <template>
-  <main class="relative flex min-h-dvh flex-col items-center justify-center gap-10 bg-gradient-to-b from-indigo-50 to-white px-6 pt-10 pb-32 sm:gap-14">
+  <main class="relative flex min-h-dvh flex-col items-center justify-center gap-10 px-6 pt-10 pb-32 sm:gap-14">
     <div
       aria-label="Logo"
       class="flex h-40 w-40 items-center justify-center rounded-3xl border-2 border-dashed border-indigo-300 text-sm text-indigo-400 sm:h-56 sm:w-56 md:h-64 md:w-64"
@@ -35,7 +35,7 @@ const { preload, play } = useSound();
 onMounted(() => preload('start.mp3'));
 
 function start() {
-  // play('start.mp3', 0.6);
+  play('start.mp3', 0.6);
   globalStore.isGameActive = true;
 }
 </script>
