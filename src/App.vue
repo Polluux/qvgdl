@@ -1,6 +1,6 @@
 <template>
   <div class="relative isolate min-h-dvh">
-    <Lockscreen v-if="!isUnlocked" />
+    <Lockscreen v-if="!globalStore.isUnlocked" />
 
     <template v-else>
       <div
@@ -28,20 +28,17 @@
 </template>
 
 <script lang="ts" setup>
-import { provide, watch, ref } from 'vue';
+import { watch } from 'vue';
 import { useGlobalStore } from '@/stores/global';
 
 import Lockscreen from '@/components/lockscreen.vue';
 import Homepage from '@/components/homepage.vue';
 import Game from '@/components/game.vue';
 
-const isUnlocked = ref(false);
-provide('lockscreen', { isUnlocked, unlock: () => (isUnlocked.value = true) });
-
 const globalStore = useGlobalStore();
 
 watch(
-  () => isUnlocked.value,
+  () => globalStore.isUnlocked,
   () => globalStore.load()
 );
 </script>

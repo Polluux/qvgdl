@@ -4,6 +4,7 @@ import { fetchQuestions } from '@/services/fetch-questions';
 import type { Question } from '@/types/question';
 
 export const useGlobalStore = defineStore('global', () => {
+  const isUnlocked = ref(false);
   const questions = ref<Question[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
@@ -23,6 +24,7 @@ export const useGlobalStore = defineStore('global', () => {
   }
 
   return {
+    isUnlocked,
     questions,
     loading,
     error,

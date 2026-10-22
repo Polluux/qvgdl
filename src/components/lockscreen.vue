@@ -27,20 +27,20 @@
 </template>
 
 <script setup lang="ts">
-import { inject, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
+import { useGlobalStore } from '@/stores/global';
 
+const globalStore = useGlobalStore();
 const password = ref('');
 const invalid = ref(false);
 
-const { unlock } = inject('lockscreen');
-
 onMounted(() => {
-  if (import.meta.env.DEV === true) unlock();
+  if (import.meta.env.DEV === true) globalStore.isUnlocked = true;
 });
 
 function submit() {
   if (password.value === import.meta.env.VITE_SECURITY_PASSPHRASE) {
-    unlock();
+    globalStore.isUnlocked = true;
   } else {
     invalid.value = true;
   }
