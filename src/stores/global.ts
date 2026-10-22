@@ -17,6 +17,7 @@ export const useGlobalStore = defineStore('global', () => {
     try {
       questions.value = await fetchQuestions();
     } catch (e) {
+      console.error(e);
       error.value = e instanceof Error ? e.message : 'Unknown error';
     } finally {
       loading.value = false;
