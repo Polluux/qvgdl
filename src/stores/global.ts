@@ -1,0 +1,25 @@
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
+import { fetchQuestions } from '@/services/fetch-questions';
+import type { Question } from '@/types/question';
+
+export const useGlobalStore = defineStore('global', () => {
+  const questions = ref<Question[]>([]);
+  const loading = ref(false);
+  const error = ref<string | null>(null);
+
+  async function load() {
+    if (questions.value.length || loading.value) return;
+    loading.value = true;
+    error.value = null;
+    try {
+      questions.value = await fetchQuestions();
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : 'Unknown error';
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  return { questions, loading, error, load };
+});
