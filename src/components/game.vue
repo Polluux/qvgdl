@@ -17,7 +17,7 @@
           <button
             aria-label="Question suivante"
             class="btn-glass btn-icon size-12"
-            :class="{ 'animate-pulse bg-indigo-800!': gameState === GAMESTATE.CHECKING && !locked }"
+            :class="{ 'animate-pulse bg-indigo-500!': gameState === GAMESTATE.CHECKING && !locked }"
             :disabled="gameState !== GAMESTATE.CHECKING || locked"
             title="Question suivante"
             type="button"
