@@ -1,4 +1,5 @@
 button {
+  @apply focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/60;
   cursor: pointer;
 
   &:disabled {
@@ -13,7 +14,7 @@ button {
 @layer components {
   .btn-glass {
     @apply rounded-full border border-white/25 bg-white/10 px-10 py-4 text-xl font-semibold text-white backdrop-blur-md transition-colors;
-    @apply hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/60 active:bg-white/25;
+    @apply hover:bg-white/20 active:bg-white/25;
 
     &:disabled {
       opacity: 50%;
@@ -162,6 +163,14 @@ button {
   }
 
   .hex[type='button']:hover:not(:disabled) {
+    background-color: rgb(255 255 255 / 0.16);
+  }
+
+  .hex:focus-visible {
+    --t: 3px;
+    --edge-a: #fff;
+    --edge-b: #fff;
+    outline: none; /* rognée par clip-path de toute façon */
     background-color: rgb(255 255 255 / 0.16);
   }
 

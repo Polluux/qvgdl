@@ -1,6 +1,6 @@
 <template>
   <main class="grid min-h-dvh grid-cols-[minmax(0,1fr)_5rem] text-white md:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]">
-    <section class="@container mx-auto flex w-full max-w-4xl flex-col gap-5 px-4 py-6 sm:px-8 md:px-12">
+    <section class="@container mx-auto flex w-full max-w-5xl flex-col gap-5 px-4 py-6 sm:px-8 md:px-12">
       <header class="flex items-center justify-center gap-4 landscape:justify-between">
         <div
           class="hidden size-[30dvh] shrink-0 items-center justify-center rounded-xl border-2 border-dashed border-white/30 text-xs text-white/50 landscape:flex"
@@ -93,6 +93,7 @@
 
           <dialog
             id="modal-info"
+            ref="modalInfo"
             closedby="any"
           >
             <header class="flex items-center gap-3">
@@ -163,7 +164,7 @@ import { DIFFICULTY } from '@/services/fetch-questions';
 import { useGlobalStore } from '@/stores/global';
 import type { Question } from '@/types/question';
 import { pickRandom, shuffle } from '@/utils/array';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
 const { preload, play } = useSound();
 
 const globalStore = useGlobalStore();
@@ -196,6 +197,8 @@ const STEP_LABEL = [
   '90 cl',
   'Champagne'
 ];
+
+const modalInfo = useTemplateRef<HTMLDialogElement>('modalInfo');
 
 const questions = ref(
   Object.values(DIFFICULTY).flatMap((diff) => {
@@ -261,6 +264,12 @@ const locked = computed(() => {
 onMounted(() => {
   preload('success.mp3');
   preload('failure.mp3');
+
+  document.addEventListener('keydown', onkeydown);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('keydown', onkeydown);
 });
 
 function selectAnswer(index: number) {
@@ -332,5 +341,25 @@ function stepClass(i: number) {
     return 'scale-105 bg-amber-300 text-slate-900 shadow-lg';
   }
   return i < currentStep.value ? 'bg-amber-500/60 text-white' : 'bg-white/10 text-white/50';
+}
+
+function onkeydown(event: KeyboardEvent) {
+  if (modalInfo.value?.open) return;
+
+  if (['Digit1', 'Numpad1'].includes(event.code) || ['a'].includes(event.key)) {
+    selectAnswer(0);
+  }
+  if (['Digit2', 'Numpad2'].includes(event.code) || ['b'].includes(event.key)) {
+    selectAnswer(1);
+  }
+  if (['Digit3', 'Numpad3'].includes(event.code) || ['c'].includes(event.key)) {
+    selectAnswer(2);
+  }
+  if (['Digit4', 'Numpad4'].includes(event.code) || ['d'].includes(event.key)) {
+    selectAnswer(3);
+  }
+  if (['Space', 'Enter'].includes(event.code)) {
+    nextQuestion();
+  }
 }
 </script>
