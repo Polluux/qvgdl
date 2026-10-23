@@ -22,6 +22,7 @@ jobs:
       - run: npm run build
         env:
             VITE_SHEET_CSV_URL: ${{ vars.VITE_SHEET_CSV_URL }}
+            VITE_SECURITY_PASSPHRASE: ${{ vars.VITE_SECURITY_PASSPHRASE }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
