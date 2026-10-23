@@ -158,11 +158,13 @@
 </template>
 
 <script setup lang="ts">
+import { useSound } from '@/composables/useSound';
 import { DIFFICULTY } from '@/services/fetch-questions';
 import { useGlobalStore } from '@/stores/global';
 import type { Question } from '@/types/question';
 import { pickRandom, shuffle } from '@/utils/array';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+const { preload, play } = useSound();
 
 const globalStore = useGlobalStore();
 
@@ -256,6 +258,11 @@ const locked = computed(() => {
   );
 });
 
+onMounted(() => {
+  preload('success.mp3');
+  preload('failure.mp3');
+});
+
 function selectAnswer(index: number) {
   if (gameState.value === GAMESTATE.CHECKING || hiddenAnswers.value.includes(index)) return;
   if (selectedAnswer.value === index) {
@@ -274,7 +281,7 @@ function resetQuestionState() {
 function validate() {
   if (gameState.value === GAMESTATE.CHECKING || hiddenAnswers.value === null) return;
   gameState.value = GAMESTATE.CHECKING;
-  // TODO: play(isCorrect.value ? 'win.mp3' : 'loose.mp3');
+  play(isCorrect.value ? 'success.mp3' : 'failure.mp3');
 }
 
 function nextQuestion() {

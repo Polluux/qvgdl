@@ -1,3 +1,5 @@
+import { useGlobalStore } from '@/stores/global';
+
 const cache = new Map<string, HTMLAudioElement>();
 
 function getAudio(file: string): HTMLAudioElement {
@@ -18,6 +20,9 @@ export function useSound() {
   }
 
   function play(file: string, volume = 1) {
+    const globalStore = useGlobalStore();
+    if (globalStore.muted) return;
+
     const audio = getAudio(file);
     audio.volume = volume;
     audio.currentTime = 0;

@@ -24,6 +24,14 @@
         <Game v-else> </Game>
       </Transition>
     </template>
+
+    <button
+      class="btn-glass btn-icon fixed top-2 left-2 size-10"
+      type="button"
+      @click="globalStore.muted = !globalStore.muted"
+    >
+      <span class="material-symbols-outlined text-base!">{{ globalStore.muted ? 'volume_off' : 'volume_up' }}</span>
+    </button>
   </div>
 </template>
 
