@@ -11,7 +11,7 @@
           <button
             aria-label="Question suivante"
             class="btn-glass size-12 btn-icon"
-            :class="{ 'animate-pulse bg-emerald-500!': gameState === GAMESTATE.CHECKING && !locked }"
+            :class="{ 'animate-pulse bg-indigo-800!': gameState === GAMESTATE.CHECKING && !locked }"
             :disabled="gameState !== GAMESTATE.CHECKING || locked"
             title="Question suivante"
             type="button"
@@ -52,6 +52,7 @@
             :key="joker.id"
             :aria-label="joker.label"
             class="btn-glass size-12 btn-icon"
+            :class="{ 'btn-glow': !joker.used }"
             :disabled="joker.used || gameState === GAMESTATE.CHECKING"
             :title="joker.label"
             type="button"

@@ -1,3 +1,7 @@
+/* ============================= */
+/* ======= GLASS BUTTONS ======= */
+/* ============================= */
+
 @layer components {
   .btn-glass {
     @apply rounded-full border border-white/25 bg-white/10 px-10 py-4 text-xl font-semibold text-white backdrop-blur-md transition-colors;
@@ -6,6 +10,7 @@
     &:disabled {
       opacity: 50%;
       cursor: not-allowed;
+      @apply bg-white/30;
     }
 
     &.btn-icon {
@@ -17,7 +22,77 @@
   }
 }
 
+/* ============================= */
+/* ======== GLOW EFFECT ======== */
+/* ============================= */
 
+@property --glow-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes glow-spin {
+  to { --glow-angle: 360deg; }
+}
+
+@layer components {
+  /* Opt-in modifier: <button class="btn-glass btn-glow"> */
+  .btn-glow {
+    --glow-color: #818cf8;   /* indigo-400, change freely */
+    --glow-width: 2px;
+    --glow-speed: 3s;
+    position: relative;
+
+    &::before,
+    &::after {
+      position: absolute;
+      inset: -1px;                 /* covers the 1px border */
+
+      animation: glow-spin var(--glow-speed) linear infinite;
+      border-radius: inherit;
+
+      /* keep only the ring (border area), hide the center */
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+
+      /* a bright "comet" with a fading tail, the rest is transparent */
+      background: conic-gradient(
+        from var(--glow-angle),
+        transparent 0deg,
+        transparent 220deg,
+        var(--glow-color) 320deg,
+        #fff 360deg
+      );
+      padding: var(--glow-width);
+      content: "";
+      pointer-events: none;
+    }
+
+    /* blurred duplicate = the halo around the ring */
+    &::after {
+      opacity: 0.8;
+      filter: blur(8px);
+    }
+
+    &:disabled::before,
+    &:disabled::after {
+      display: none;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-glow::before,
+  .btn-glow::after {
+    animation: none;
+  }
+}
+
+/* ============================= */
+/* ======== HEX BUTTONS ======== */
+/* ============================= */
 
 @layer components {
   .hex {
