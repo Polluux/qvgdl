@@ -5,11 +5,11 @@
     <template v-else>
       <div
         aria-hidden
-        class="animated-mesh fixed inset-0 -z-20"
+        class="bubble-mesh fixed inset-0 -z-20"
       />
       <div
         aria-hidden="true"
-        class="fixed-mesh fixed inset-0 -z-10 transition-opacity duration-1000"
+        class="gradient-mesh fixed inset-0 -z-10 transition-opacity duration-1000"
         :class="globalStore.isGameActive ? 'opacity-100' : 'opacity-0'"
       />
 
