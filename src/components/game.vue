@@ -7,7 +7,9 @@
         >
           QR code
         </div>
-        <div class="flex aspect-3/2 w-full max-w-[45dvh] items-center justify-center rounded-xl border-2 border-dashed border-white/30 text-xs text-white/50">
+        <div
+          class="flex aspect-3/2 w-full max-w-[25dvh] items-center justify-center rounded-xl border-2 border-dashed border-white/30 text-xs text-white/50 sm:max-w-[35dvh] md:max-w-[45dvh]"
+        >
           Logo
         </div>
       </header>
@@ -134,7 +136,7 @@
             @click="selectAnswer(i)"
           >
             <span :class="{ invisible: hiddenAnswers.includes(i) }">
-              <span class="mr-3 shrink-0 text-amber-300"> {{ 'ABCD'[i] }}&nbsp;: </span>
+              <span class="mr-1 shrink-0 text-amber-300 sm:mr-2 md:mr-3"> {{ 'ABCD'[i] }}&nbsp;:</span>
               {{ answer.label }}
             </span>
           </button>
