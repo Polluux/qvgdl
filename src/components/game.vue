@@ -1,9 +1,9 @@
 <template>
-  <main class="grid min-h-dvh grid-cols-[1fr_5rem] text-white md:grid-cols-[3fr_1fr]">
-    <section class="mx-auto flex w-full max-w-4xl flex-col gap-5 px-4 py-6 sm:px-8 md:px-12">
-      <header class="flex items-center justify-between">
-        <div class="flex size-64 items-center justify-center rounded-xl border-2 border-dashed border-white/30 text-xs text-white/50">QR code</div>
-        <div class="flex h-64 w-128 items-center justify-center rounded-xl border-2 border-dashed border-white/30 text-xs text-white/50">Logo</div>
+  <main class="grid min-h-dvh grid-cols-[minmax(0,1fr)_5rem] text-white md:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]">
+    <section class="@container mx-auto flex w-full max-w-4xl flex-col gap-5 px-4 py-6 sm:px-8 md:px-12">
+      <header class="flex items-center justify-center gap-4 landscape:justify-between">
+        <div class="hidden size-[30dvh] shrink-0 items-center justify-center rounded-xl border-2 border-dashed border-white/30 text-xs text-white/50 landscape:flex">QR code</div>
+        <div class="flex aspect-3/2 w-full max-w-[45dvh] items-center justify-center rounded-xl border-2 border-dashed border-white/30 text-xs text-white/50">Logo</div>
       </header>
 
       <div class="flex flex-wrap items-center justify-between gap-3">
@@ -67,8 +67,8 @@
         </div>
       </div>
 
-      <article class="hex-row">
-        <div class="hex min-w-[90%] flex flex-col items-start flex-1 text-xl sm:text-2xl">
+      <article class="hex-row hex-row-stretch">
+        <div class="hex flex flex-col items-start text-xl wrap-anywhere sm:text-2xl">
           <div class="flex w-full justify-between gap-4">
             <p class="mb-2 text-sm tracking-wide text-white/60 uppercase">Question {{ currentStep + 1 }} / {{ questions.length }}</p>
             <button
@@ -94,21 +94,21 @@
         </div>
       </article>
 
-      <div class="grid grid-cols-1 gap-y-3 sm:grid-cols-2">
+      <div class="grid grid-cols-1 gap-y-3 @2xl:grid-cols-2">
         <div
           v-for="(answer, i) in currentQuestion.answers"
           :key="`${currentQuestion.id}-${answer.label}`"
-          class="hex-row"
+          class="hex-row hex-row-stretch"
           :class="hiddenAnswers.includes(i) && 'invisible'"
         >
           <button
-            class="hex min-w-[90%] flex-1 justify-start text-lg"
+            class="hex self-stretch justify-start text-left text-base wrap-anywhere sm:text-lg"
             :class="answerClass(i)"
             :disabled="gameState === GAMESTATE.CHECKING || hiddenAnswers.includes(i)"
             type="button"
             @click="selectAnswer(i)"
           >
-            <span class="mr-3 text-amber-300">{{ 'ABCD'[i] }} :</span>{{ answer.label }}
+            <span class="mr-3 shrink-0 text-amber-300">{{ 'ABCD'[i] }}&nbsp;:</span>{{ answer.label }}
           </button>
         </div>
       </div>

@@ -81,6 +81,14 @@
     font-weight: 600;
   }
 
+  /* Pointes et marges réduites sur petit écran */
+  @media (width < 40rem) {
+    .hex {
+      --p: 1.25rem;
+      padding: 0.75rem calc(var(--p) + 0.75rem);
+    }
+  }
+
   .hex[type="button"]:hover:not(:disabled) {
     background-color: rgb(255 255 255 / 0.16);
   }
@@ -127,5 +135,25 @@
   /* le bouton passe au-dessus des traits */
   .hex-row > .hex {
     z-index: 1;
+  }
+
+  /* Variante : traits de longueur fixe, le bouton prend le reste (pointes alignées d'une rangée à l'autre) */
+  .hex-row-stretch {
+    --line: 2.5rem;
+  }
+
+  .hex-row-stretch::before,
+  .hex-row-stretch::after {
+    flex: 0 0 var(--line);
+  }
+
+  .hex-row-stretch > .hex {
+    flex: 1;
+  }
+
+  @media (width < 40rem) {
+    .hex-row-stretch {
+      --line: 1rem;
+    }
   }
 }

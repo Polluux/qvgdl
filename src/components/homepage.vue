@@ -46,7 +46,7 @@
 
     <div
       aria-label="QR code vers la page de contact"
-      class="absolute right-6 bottom-6 hidden h-32 w-32 items-center justify-center rounded-xl border-2 border-dashed border-slate-300 p-1 text-center text-xs text-slate-400 sm:flex md:h-36 md:w-36"
+      class="absolute right-6 bottom-6 hidden h-32 w-32 items-center justify-center rounded-xl border-2 border-dashed border-slate-300 p-1 text-center text-xs text-slate-400 landscape:flex md:h-36 md:w-36"
     >
       QR code
     </div>
