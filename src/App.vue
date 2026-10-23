@@ -4,12 +4,12 @@
 
     <template v-else>
       <div
-        aria-hidden="true"
-        class="fixed inset-0 -z-20 bg-gradient-to-b from-indigo-100 via-indigo-50 to-white"
+        aria-hidden
+        class="animated-mesh fixed inset-0 -z-20"
       />
       <div
         aria-hidden="true"
-        class="fixed inset-0 -z-10 bg-gradient-to-b from-indigo-200 to-indigo-300 transition-opacity duration-1000 motion-reduce:transition-none"
+        class="fixed-mesh fixed inset-0 -z-10 transition-opacity duration-1000"
         :class="globalStore.isGameActive ? 'opacity-100' : 'opacity-0'"
       />
 

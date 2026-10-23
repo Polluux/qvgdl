@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+@import 'gradient.css';
+@import 'buttons.css';
 
 html,
 body,
