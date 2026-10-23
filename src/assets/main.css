@@ -1,6 +1,7 @@
 @import 'tailwindcss';
-@import 'gradient.css';
-@import 'buttons.css';
+@import './gradient.css';
+@import './buttons.css';
+@import './dialog.css';
 
 html,
 body,

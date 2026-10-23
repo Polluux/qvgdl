@@ -1,0 +1,56 @@
+@layer components {
+  dialog {
+    @apply fixed top-1/2 left-1/2 m-0 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl border border-white/25 bg-white/10 px-6 py-6 text-white backdrop-blur-xl sm:px-8;
+    transition:
+      opacity 0.25s,
+      scale 0.25s,
+      display 0.25s allow-discrete,
+      overlay 0.25s allow-discrete;
+
+    /* closed state (also the starting point of the open animation) */
+    opacity: 0;
+    overflow: visible; /* lets the close button stick out */
+    scale: 0.96;
+
+    &[open] {
+      opacity: 1;
+      scale: 1;
+
+      @starting-style {
+        opacity: 0;
+        scale: 0.96;
+      }
+    }
+
+    &::backdrop {
+      transition:
+        opacity 0.25s,
+        display 0.25s allow-discrete,
+        overlay 0.25s allow-discrete;
+      opacity: 0;
+      backdrop-filter: blur(4px);
+      background: rgb(2 6 23 / 0.55); /* slate-950 */
+    }
+
+    &[open]::backdrop {
+      opacity: 1;
+
+      @starting-style {
+        opacity: 0;
+      }
+    }
+  }
+
+  /* Gradient divider, same fade as the .hex-row lines */
+  .modal-divider {
+    @apply my-4 h-px border-0;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.5), transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog,
+  dialog::backdrop {
+    transition: none;
+  }
+}

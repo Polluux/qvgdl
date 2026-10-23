@@ -1,3 +1,11 @@
+button {
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
 /* ============================= */
 /* ======= GLASS BUTTONS ======= */
 /* ============================= */
@@ -5,11 +13,10 @@
 @layer components {
   .btn-glass {
     @apply rounded-full border border-white/25 bg-white/10 px-10 py-4 text-xl font-semibold text-white backdrop-blur-md transition-colors;
-    @apply hover:bg-white/20 active:bg-white/25 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/60;
-  
+    @apply hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/60 active:bg-white/25;
+
     &:disabled {
       opacity: 50%;
-      cursor: not-allowed;
       @apply bg-white/30;
     }
 
@@ -27,19 +34,21 @@
 /* ============================= */
 
 @property --glow-angle {
-  syntax: "<angle>";
+  syntax: '<angle>';
   inherits: false;
   initial-value: 0deg;
 }
 
 @keyframes glow-spin {
-  to { --glow-angle: 360deg; }
+  to {
+    --glow-angle: 360deg;
+  }
 }
 
 @layer components {
   /* Opt-in modifier: <button class="btn-glass btn-glow"> */
   .btn-glow {
-    --glow-color: #818cf8;   /* indigo-400, change freely */
+    --glow-color: #818cf8; /* indigo-400, change freely */
     --glow-width: 2px;
     --glow-speed: 3s;
     position: relative;
@@ -47,26 +56,24 @@
     &::before,
     &::after {
       position: absolute;
-      inset: -1px;                 /* covers the 1px border */
+      inset: -1px; /* covers the 1px border */
 
       animation: glow-spin var(--glow-speed) linear infinite;
       border-radius: inherit;
 
       /* keep only the ring (border area), hide the center */
-      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-      mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+      -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      mask:
+        linear-gradient(#000 0 0) content-box exclude,
+        linear-gradient(#000 0 0);
       -webkit-mask-composite: xor;
 
       /* a bright "comet" with a fading tail, the rest is transparent */
-      background: conic-gradient(
-        from var(--glow-angle),
-        transparent 0deg,
-        transparent 220deg,
-        var(--glow-color) 320deg,
-        #fff 360deg
-      );
+      background: conic-gradient(from var(--glow-angle), transparent 0deg, transparent 220deg, var(--glow-color) 320deg, #fff 360deg);
       padding: var(--glow-width);
-      content: "";
+      content: '';
       pointer-events: none;
     }
 
@@ -96,10 +103,10 @@
 
 @layer components {
   .hex {
-    --p: 1.75rem;    /* profondeur des pointes */
-    --t: 1.5px;      /* épaisseur du liseré */
-    --r: 0.5rem;     /* arrondi sur les bords haut/bas (0 = angle vif) */
-    --f: 0.22;       /* arrondi sur les diagonales, en fraction de leur longueur (0 = angle vif) */
+    --p: 1.75rem; /* profondeur des pointes */
+    --t: 1.5px; /* épaisseur du liseré */
+    --r: 0.5rem; /* arrondi sur les bords haut/bas (0 = angle vif) */
+    --f: 0.22; /* arrondi sur les diagonales, en fraction de leur longueur (0 = angle vif) */
     --edge-a: rgb(255 255 255 / 0.85);
     --edge-b: rgb(255 255 255 / 0.3);
 
@@ -108,19 +115,12 @@
     --ea: calc(50% * var(--f));
     --o-start: calc(var(--p) + var(--r)) 0;
     --o:
-      line to calc(100% - var(--p) - var(--r)) 0,
-      curve to calc(100% - var(--p) + var(--da)) var(--ea) with calc(100% - var(--p)) 0,
-      line to calc(100% - var(--da)) calc(50% - var(--ea)),
-      curve to calc(100% - var(--da)) calc(50% + var(--ea)) with 100% 50%,
-      line to calc(100% - var(--p) + var(--da)) calc(100% - var(--ea)),
-      curve to calc(100% - var(--p) - var(--r)) 100% with calc(100% - var(--p)) 100%,
-      line to calc(var(--p) + var(--r)) 100%,
-      curve to calc(var(--p) - var(--da)) calc(100% - var(--ea)) with var(--p) 100%,
-      line to var(--da) calc(50% + var(--ea)),
-      curve to var(--da) calc(50% - var(--ea)) with 0 50%,
-      line to calc(var(--p) - var(--da)) var(--ea),
-      curve to calc(var(--p) + var(--r)) 0 with var(--p) 0,
-      close;
+      line to calc(100% - var(--p) - var(--r)) 0, curve to calc(100% - var(--p) + var(--da)) var(--ea) with calc(100% - var(--p)) 0,
+      line to calc(100% - var(--da)) calc(50% - var(--ea)), curve to calc(100% - var(--da)) calc(50% + var(--ea)) with 100% 50%,
+      line to calc(100% - var(--p) + var(--da)) calc(100% - var(--ea)), curve to calc(100% - var(--p) - var(--r)) 100% with calc(100% - var(--p)) 100%,
+      line to calc(var(--p) + var(--r)) 100%, curve to calc(var(--p) - var(--da)) calc(100% - var(--ea)) with var(--p) 100%,
+      line to var(--da) calc(50% + var(--ea)), curve to var(--da) calc(50% - var(--ea)) with 0 50%, line to calc(var(--p) - var(--da)) var(--ea),
+      curve to calc(var(--p) + var(--r)) 0 with var(--p) 0, close;
 
     /* ---- Contour intérieur (pour dessiner le liseré en anneau) ---- */
     --tx: calc(var(--t) * 1.4);
@@ -136,11 +136,8 @@
       curve to calc(100% - var(--p) - var(--r)) calc(100% - var(--t)) with calc(100% - var(--p)) calc(100% - var(--t)),
       line to calc(var(--p) + var(--r)) calc(100% - var(--t)),
       curve to calc(var(--p) - var(--d)) calc(100% - var(--t) - var(--e)) with var(--p) calc(100% - var(--t)),
-      line to calc(var(--tx) + var(--d)) calc(50% + var(--e)),
-      curve to calc(var(--tx) + var(--d)) calc(50% - var(--e)) with var(--tx) 50%,
-      line to calc(var(--p) - var(--d)) calc(var(--t) + var(--e)),
-      curve to calc(var(--p) + var(--r)) var(--t) with var(--p) var(--t),
-      close;
+      line to calc(var(--tx) + var(--d)) calc(50% + var(--e)), curve to calc(var(--tx) + var(--d)) calc(50% - var(--e)) with var(--tx) 50%,
+      line to calc(var(--p) - var(--d)) calc(var(--t) + var(--e)), curve to calc(var(--p) + var(--r)) var(--t) with var(--p) var(--t), close;
     display: inline-flex;
 
     position: relative;
@@ -164,7 +161,7 @@
     }
   }
 
-  .hex[type="button"]:hover:not(:disabled) {
+  .hex[type='button']:hover:not(:disabled) {
     background-color: rgb(255 255 255 / 0.16);
   }
 
@@ -172,12 +169,9 @@
   .hex::before {
     position: absolute;
     inset: 0;
-    clip-path: shape(
-      evenodd from var(--o-start), var(--o),
-      move to var(--i-start), var(--i)
-    );
+    clip-path: shape(evenodd from var(--o-start), var(--o), move to var(--i-start), var(--i));
     background: linear-gradient(90deg, var(--edge-a), var(--edge-b) 50%, var(--edge-a));
-    content: "";
+    content: '';
     pointer-events: none;
   }
 
@@ -191,10 +185,10 @@
   .hex-row::after {
     position: relative;
     flex: 1;
-    z-index: 0;            /* sous le bouton */
+    z-index: 0; /* sous le bouton */
     min-width: 1rem;
     height: 2.5px;
-    content: "";
+    content: '';
   }
 
   /* margin négative = le trait rejoint la pointe arrondie */

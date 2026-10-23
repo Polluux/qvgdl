@@ -2,47 +2,47 @@
   <main class="grid min-h-dvh grid-cols-[minmax(0,1fr)_5rem] text-white md:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]">
     <section class="@container mx-auto flex w-full max-w-4xl flex-col gap-5 px-4 py-6 sm:px-8 md:px-12">
       <header class="flex items-center justify-center gap-4 landscape:justify-between">
-        <div class="hidden size-[30dvh] shrink-0 items-center justify-center rounded-xl border-2 border-dashed border-white/30 text-xs text-white/50 landscape:flex">QR code</div>
-        <div class="flex aspect-3/2 w-full max-w-[45dvh] items-center justify-center rounded-xl border-2 border-dashed border-white/30 text-xs text-white/50">Logo</div>
+        <div
+          class="hidden size-[30dvh] shrink-0 items-center justify-center rounded-xl border-2 border-dashed border-white/30 text-xs text-white/50 landscape:flex"
+        >
+          QR code
+        </div>
+        <div class="flex aspect-3/2 w-full max-w-[45dvh] items-center justify-center rounded-xl border-2 border-dashed border-white/30 text-xs text-white/50">
+          Logo
+        </div>
       </header>
 
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex gap-2">
           <button
             aria-label="Question suivante"
-            class="btn-glass size-12 btn-icon"
+            class="btn-glass btn-icon size-12"
             :class="{ 'animate-pulse bg-indigo-800!': gameState === GAMESTATE.CHECKING && !locked }"
             :disabled="gameState !== GAMESTATE.CHECKING || locked"
             title="Question suivante"
             type="button"
             @click="nextQuestion"
           >
-            <span class="material-symbols-outlined">
-              arrow_forward
-            </span>
+            <span class="material-symbols-outlined"> arrow_forward </span>
           </button>
           <button
             aria-label="Changer la question"
-            class="btn-glass size-12 btn-icon"
+            class="btn-glass btn-icon size-12"
             :disabled="!replacementPool.length"
             title="Changer la question"
             type="button"
             @click="changeCurrentQuestion"
           >
-            <span class="material-symbols-outlined">
-              refresh
-            </span>
+            <span class="material-symbols-outlined"> refresh </span>
           </button>
           <button
             aria-label="Retour à l'accueil"
-            class="btn-glass size-12 btn-icon"
+            class="btn-glass btn-icon size-12"
             title="Retour à l'accueil"
             type="button"
             @click="restart"
           >
-            <span class="material-symbols-outlined">
-              home
-            </span>
+            <span class="material-symbols-outlined"> home </span>
           </button>
         </div>
 
@@ -51,18 +51,24 @@
             v-for="joker in jokers"
             :key="joker.id"
             :aria-label="joker.label"
-            class="btn-glass size-12 btn-icon"
+            class="btn-glass btn-icon size-12"
             :class="{ 'btn-glow': !joker.used }"
             :disabled="joker.used || gameState === GAMESTATE.CHECKING"
             :title="joker.label"
             type="button"
             @click="(joker.used = true) && joker.action()"
           >
-            <span v-if="joker.icon" class="material-symbols-outlined">
+            <span
+              v-if="joker.icon"
+              class="material-symbols-outlined"
+            >
               {{ joker.icon }}
             </span>
-            <span v-else class="text-sm">
-              {{ joker.text}}
+            <span
+              v-else
+              class="text-sm"
+            >
+              {{ joker.text }}
             </span>
           </button>
         </div>
@@ -74,24 +80,42 @@
             <p class="mb-2 text-sm tracking-wide text-white/60 uppercase">Question {{ currentStep + 1 }} / {{ questions.length }}</p>
             <button
               v-if="currentQuestion.note"
-              :aria-expanded="showNote"
               aria-label="Afficher la note"
-              class="btn-glass p-0 size-5 shrink-0 rounded-full text-sm transition hover:bg-white/20"
+              class="btn-glass size-5 shrink-0 rounded-full p-0 text-sm transition hover:bg-white/20"
+              command="show-modal"
+              commandfor="modal-info"
               type="button"
-              @click="showNote = !showNote"
             >
               i
             </button>
           </div>
           <p class="text-xl font-semibold sm:text-2xl">{{ currentQuestion.text }}</p>
 
-          <p
-            v-if="showNote"
-            class="mt-4 rounded-xl bg-black/20 p-4 text-sm text-white/80"
+          <dialog
+            id="modal-info"
+            closedby="any"
           >
-            {{ currentQuestion.note }}
-          </p>
+            <header class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-amber-300">info</span>
+              <h2 class="text-lg tracking-wide italic opacity-75">Le saviez-vous ?</h2>
+            </header>
 
+            <hr class="modal-divider" />
+
+            <div class="max-h-[60dvh] overflow-y-auto leading-relaxed text-white/90">
+              <p>{{ currentQuestion.note }}</p>
+            </div>
+
+            <button
+              aria-label="Fermer"
+              class="btn-glass btn-icon absolute top-0 right-0 size-9 translate-x-1/2 -translate-y-1/2 border-red-300/40 bg-red-700 hover:bg-red-600"
+              command="close"
+              commandfor="modal-info"
+              type="button"
+            >
+              <span class="material-symbols-outlined">close_small</span>
+            </button>
+          </dialog>
         </div>
       </article>
 
@@ -102,16 +126,14 @@
           class="hex-row hex-row-stretch"
         >
           <button
-            class="hex self-stretch justify-start text-left text-base wrap-anywhere sm:text-lg"
+            class="hex justify-start self-stretch text-left text-base wrap-anywhere sm:text-lg"
             :class="answerClass(i)"
             :disabled="gameState === GAMESTATE.CHECKING || hiddenAnswers.includes(i)"
             type="button"
             @click="selectAnswer(i)"
           >
-            <span :class="{ 'invisible': hiddenAnswers.includes(i) }">
-              <span class="mr-3 shrink-0 text-amber-300">
-                {{ 'ABCD'[i] }}&nbsp;:
-              </span>
+            <span :class="{ invisible: hiddenAnswers.includes(i) }">
+              <span class="mr-3 shrink-0 text-amber-300"> {{ 'ABCD'[i] }}&nbsp;: </span>
               {{ answer.label }}
             </span>
           </button>
@@ -187,7 +209,6 @@ const selectedAnswer = ref<number | null>(null);
 const hiddenAnswers = ref<number[]>([]); // Used only when using split joker
 const currentStep = ref(0);
 const gameState = ref(GAMESTATE.PLAYING);
-const showNote = ref(false);
 const jokers = ref([
   {
     id: 'split',
@@ -201,7 +222,7 @@ const jokers = ref([
     id: 'call_friend',
     icon: 'phone_enabled',
     text: '',
-    label: 'Demander l\'aide d\'un ami',
+    label: "Demander l'aide d'un ami",
     action: () => {},
     used: false
   },
@@ -209,7 +230,7 @@ const jokers = ref([
     id: 'ask_pub',
     icon: 'sports_bar',
     text: '',
-    label: 'Demander l\'avis du barman',
+    label: "Demander l'avis du barman",
     action: () => {},
     used: false
   }
@@ -229,9 +250,9 @@ const isCorrect = computed(() => selectedAnswer.value !== null && !!currentQuest
 const locked = computed(() => {
   // Game is locked when we are checking results
   return (
-    gameState.value === GAMESTATE.CHECKING
+    gameState.value === GAMESTATE.CHECKING &&
     // And user is wrong or its the last question
-    && (!isCorrect.value || currentStep.value === maxStep.value)
+    (!isCorrect.value || currentStep.value === maxStep.value)
   );
 });
 
@@ -245,7 +266,6 @@ function selectAnswer(index: number) {
 }
 
 function resetQuestionState() {
-  showNote.value = false;
   selectedAnswer.value = null;
   hiddenAnswers.value = [];
   gameState.value = GAMESTATE.PLAYING;
