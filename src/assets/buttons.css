@@ -2,6 +2,18 @@
   .btn-glass {
     @apply rounded-full border border-white/25 bg-white/10 px-10 py-4 text-xl font-semibold text-white backdrop-blur-md transition-colors;
     @apply hover:bg-white/20 active:bg-white/25 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/60;
+  
+    &:disabled {
+      opacity: 50%;
+      cursor: not-allowed;
+    }
+
+    &.btn-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
   }
 }
 
@@ -69,7 +81,7 @@
     font-weight: 600;
   }
 
-  .hex:hover:not(:disabled) {
+  .hex[type="button"]:hover:not(:disabled) {
     background-color: rgb(255 255 255 / 0.16);
   }
 
@@ -98,7 +110,7 @@
     flex: 1;
     z-index: 0;            /* sous le bouton */
     min-width: 1rem;
-    height: 1.5px;
+    height: 2.5px;
     content: "";
   }
 

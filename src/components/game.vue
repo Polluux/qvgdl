@@ -6,108 +6,111 @@
         <div class="flex h-64 w-128 items-center justify-center rounded-xl border-2 border-dashed border-white/30 text-xs text-white/50">Logo</div>
       </header>
 
-      <template v-if="currentQuestion">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <div class="flex gap-2">
-            <button
-              aria-label="Question suivante"
-              class="relative flex size-12 items-center justify-center rounded-full border border-white/20 bg-white/10 transition enabled:hover:bg-white/25 enabled:active:scale-95 disabled:cursor-not-allowed disabled:opacity-30"
-              :class="{ 'animate-pulse bg-emerald-500!': gameState === GAMESTATE.CHECKING && !locked }"
-              :disabled="gameState !== GAMESTATE.CHECKING || locked"
-              title="Question suivante"
-              type="button"
-              @click="nextQuestion"
-            >
-              &gt;
-            </button>
-            <button
-              aria-label="Changer la question"
-              class="relative flex size-12 items-center justify-center rounded-full border border-white/20 bg-white/10 transition enabled:hover:bg-white/25 enabled:active:scale-95 disabled:cursor-not-allowed disabled:opacity-30"
-              :disabled="!replacementPool.length"
-              title="Changer la question"
-              type="button"
-              @click="changeCurrentQuestion"
-            >
-              o
-            </button>
-            <button
-              aria-label="Retour à l'accueil"
-              class="relative flex size-12 items-center justify-center rounded-full border border-white/20 bg-white/10 transition enabled:hover:bg-white/25 enabled:active:scale-95 disabled:cursor-not-allowed disabled:opacity-30"
-              title="Retour à l'accueil"
-              type="button"
-              @click="restart"
-            >
-              &lt;
-            </button>
-          </div>
-
-          <div class="flex gap-2">
-            <button
-              v-for="joker in jokers"
-              :key="joker.id"
-              :aria-label="joker.label"
-              class="relative flex size-12 items-center justify-center rounded-full border border-white/20 bg-white/10 transition enabled:hover:bg-white/25 enabled:active:scale-95 disabled:cursor-not-allowed disabled:opacity-30"
-              :disabled="joker.used || gameState === GAMESTATE.CHECKING"
-              :title="joker.label"
-              type="button"
-              @click="(joker.used = true) && joker.action"
-            >
-              {{ joker.icon }}
-            </button>
-          </div>
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex gap-2">
+          <button
+            aria-label="Question suivante"
+            class="btn-glass size-12 btn-icon"
+            :class="{ 'animate-pulse bg-emerald-500!': gameState === GAMESTATE.CHECKING && !locked }"
+            :disabled="gameState !== GAMESTATE.CHECKING || locked"
+            title="Question suivante"
+            type="button"
+            @click="nextQuestion"
+          >
+            <span class="material-symbols-outlined">
+              arrow_forward
+            </span>
+          </button>
+          <button
+            aria-label="Changer la question"
+            class="btn-glass size-12 btn-icon"
+            :disabled="!replacementPool.length"
+            title="Changer la question"
+            type="button"
+            @click="changeCurrentQuestion"
+          >
+            <span class="material-symbols-outlined">
+              refresh
+            </span>
+          </button>
+          <button
+            aria-label="Retour à l'accueil"
+            class="btn-glass size-12 btn-icon"
+            title="Retour à l'accueil"
+            type="button"
+            @click="restart"
+          >
+            <span class="material-symbols-outlined">
+              home
+            </span>
+          </button>
         </div>
 
-        <article class="rounded-3xl border border-white/20 bg-white/10 p-6 shadow-2xl backdrop-blur-md sm:p-8">
-          <p class="mb-2 text-sm tracking-wide text-white/60 uppercase">Question {{ currentStep + 1 }} / {{ questions.length }}</p>
-          <div class="flex items-start justify-between gap-4">
-            <p class="text-xl font-semibold sm:text-2xl">{{ currentQuestion.text }}</p>
+        <div class="flex gap-2">
+          <button
+            v-for="joker in jokers"
+            :key="joker.id"
+            :aria-label="joker.label"
+            class="btn-glass size-12 btn-icon"
+            :disabled="joker.used || gameState === GAMESTATE.CHECKING"
+            :title="joker.label"
+            type="button"
+            @click="(joker.used = true) && joker.action"
+          >
+            <span v-if="joker.icon" class="material-symbols-outlined">
+              {{ joker.icon }}
+            </span>
+            <span v-else class="text-sm">
+              {{ joker.text}}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <article class="hex-row">
+        <div class="hex min-w-[90%] flex flex-col items-start flex-1 text-xl sm:text-2xl">
+          <div class="flex w-full justify-between gap-4">
+            <p class="mb-2 text-sm tracking-wide text-white/60 uppercase">Question {{ currentStep + 1 }} / {{ questions.length }}</p>
             <button
               v-if="currentQuestion.note"
               :aria-expanded="showNote"
               aria-label="Afficher la note"
-              class="shrink-0 rounded-full p-2 transition hover:bg-white/20"
+              class="btn-glass p-0 size-5 shrink-0 rounded-full text-sm transition hover:bg-white/20"
               type="button"
               @click="showNote = !showNote"
             >
               i
             </button>
           </div>
+          <p class="text-xl font-semibold sm:text-2xl">{{ currentQuestion.text }}</p>
+
           <p
             v-if="showNote"
             class="mt-4 rounded-xl bg-black/20 p-4 text-sm text-white/80"
           >
             {{ currentQuestion.note }}
           </p>
-        </article>
 
-        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        </div>
+      </article>
+
+      <div class="grid grid-cols-1 gap-y-3 sm:grid-cols-2">
+        <div
+          v-for="(answer, i) in currentQuestion.answers"
+          :key="`${currentQuestion.id}-${answer.label}`"
+          class="hex-row"
+          :class="hiddenAnswers.includes(i) && 'invisible'"
+        >
           <button
-            v-for="(answer, i) in currentQuestion.answers"
-            :key="`${currentQuestion.id}-${answer.label}`"
-            class="flex items-center rounded-2xl border px-4 py-4 text-left text-base font-medium transition sm:text-lg"
+            class="hex min-w-[90%] flex-1 justify-start text-lg"
             :class="answerClass(i)"
             :disabled="gameState === GAMESTATE.CHECKING || hiddenAnswers.includes(i)"
             type="button"
             @click="selectAnswer(i)"
           >
-            <span class="mr-3 font-bold opacity-60">{{ 'ABCD'[i] }}</span>
-            {{ answer.label }}
+            <span class="mr-3 text-amber-300">{{ 'ABCD'[i] }} :</span>{{ answer.label }}
           </button>
         </div>
-      </template>
-
-      <div
-        v-else
-        class="rounded-2xl bg-red-500/20 p-6 text-center"
-      >
-        <p>Aucune question disponible.</p>
-        <button
-          class="mt-4 underline"
-          type="button"
-          @click="restart"
-        >
-          Retour à l'accueil
-        </button>
       </div>
     </section>
 
@@ -183,22 +186,25 @@ const showNote = ref(false);
 const jokers = ref([
   {
     id: 'split',
-    icon: '/',
+    icon: '',
+    text: '50:50',
     label: 'Supprimer deux mauvaises réponses',
     action: split,
     used: false
   },
   {
     id: 'call_friend',
-    icon: 'A',
-    label: "Demander l'aide d'un ami",
+    icon: 'phone_enabled',
+    text: '',
+    label: 'Demander l\'aide d\'un ami',
     action: () => {},
     used: false
   },
   {
     id: 'ask_pub',
-    icon: 'B',
-    label: "Demander l'avis du barman",
+    icon: 'sports_bar',
+    text: '',
+    label: 'Demander l\'avis du barman',
     action: () => {},
     used: false
   }
@@ -218,9 +224,9 @@ const isCorrect = computed(() => selectedAnswer.value !== null && !!currentQuest
 const locked = computed(() => {
   // Game is locked when we are checking results
   return (
-    gameState.value === GAMESTATE.CHECKING &&
+    gameState.value === GAMESTATE.CHECKING
     // And user is wrong or its the last question
-    (!isCorrect.value || currentStep.value === maxStep.value)
+    && (!isCorrect.value || currentStep.value === maxStep.value)
   );
 });
 
