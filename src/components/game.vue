@@ -212,7 +212,7 @@ const jokers = ref([
 
 const maxStep = computed(() => questions.value.length - 1);
 const stepLabels = computed(() => STEP_LABEL.slice(0, questions.value.length));
-const currentQuestion = computed(() => questions.value[currentStep.value]);
+const currentQuestion = computed(() => questions.value[currentStep.value]!);
 
 // Used when trying to change the current question
 const replacementPool = computed(() => {
