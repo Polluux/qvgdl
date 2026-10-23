@@ -56,7 +56,7 @@
             :disabled="joker.used || gameState === GAMESTATE.CHECKING"
             :title="joker.label"
             type="button"
-            @click="(joker.used = true) && joker.action"
+            @click="(joker.used = true) && joker.action()"
           >
             <span v-if="joker.icon" class="material-symbols-outlined">
               {{ joker.icon }}
@@ -95,12 +95,11 @@
         </div>
       </article>
 
-      <div class="grid grid-cols-1 gap-y-3 @2xl:grid-cols-2">
-        <div
+      <ul class="grid grid-cols-1 gap-y-3 @2xl:grid-cols-2">
+        <li
           v-for="(answer, i) in currentQuestion.answers"
           :key="`${currentQuestion.id}-${answer.label}`"
           class="hex-row hex-row-stretch"
-          :class="hiddenAnswers.includes(i) && 'invisible'"
         >
           <button
             class="hex self-stretch justify-start text-left text-base wrap-anywhere sm:text-lg"
@@ -109,10 +108,15 @@
             type="button"
             @click="selectAnswer(i)"
           >
-            <span class="mr-3 shrink-0 text-amber-300">{{ 'ABCD'[i] }}&nbsp;:</span>{{ answer.label }}
+            <span :class="{ 'invisible': hiddenAnswers.includes(i) }">
+              <span class="mr-3 shrink-0 text-amber-300">
+                {{ 'ABCD'[i] }}&nbsp;:
+              </span>
+              {{ answer.label }}
+            </span>
           </button>
-        </div>
-      </div>
+        </li>
+      </ul>
     </section>
 
     <aside class="sticky top-0 h-dvh self-start border-l border-white/10 bg-black/20 p-2 sm:p-4">
@@ -285,15 +289,14 @@ function split() {
 }
 
 function answerClass(i: number) {
-  if (hiddenAnswers.value.includes(i)) return 'invisible';
   const selected = selectedAnswer.value === i;
 
   if (gameState.value === GAMESTATE.CHECKING) {
     if (currentQuestion.value?.answers[i]?.correct) return 'border-emerald-300 bg-emerald-500 text-white';
     if (selected) return 'border-red-300 bg-red-500 text-white';
-    return 'border-white/10 bg-white/5 opacity-50';
+    return '';
   }
-  return selected ? 'border-yellow-200 bg-yellow-400 text-slate-900' : 'border-white/20 bg-white/10 hover:bg-white/20 active:scale-[0.98]';
+  return selected ? 'border-yellow-200 bg-yellow-500 text-slate-900 [&_span]:text-slate-900' : '';
 }
 
 function stepClass(i: number) {
