@@ -110,7 +110,10 @@ const uid = `beer-${Math.random().toString(36).slice(2, 8)}`;
 
 // ---------- Paliers ----------
 const n = computed(() => Math.max(props.labels.length, 1));
-const current = computed(() => Math.min(Math.max(props.step, 0), n.value - 1));
+const current = computed(() => {
+  const cstep = Math.min(Math.max(props.step, 0), n.value - 1);
+  return props.broken ? Math.max(cstep - 1, 0) : cstep;
+});
 const band = computed(() => (LEVEL_0 - TOP) / n.value);
 const fontSize = computed(() => Math.min(15, band.value * 0.5));
 
@@ -276,8 +279,9 @@ const CRACKS = (() => {
   return { paths, shards };
 })();
 
-type LabelState = 'past' | 'current' | 'upcoming';
-const stateOf = (i: number): LabelState => (i < current.value ? 'past' : i === current.value ? 'current' : 'upcoming');
+type LabelState = 'past' | 'current' | 'upcoming' | 'error';
+const stateOf = (i: number): LabelState =>
+  i < current.value ? 'past' : i === current.value ? 'current' : props.broken && i === current.value + 1 ? 'error' : 'upcoming';
 </script>
 
 <template>
@@ -586,7 +590,7 @@ const stateOf = (i: number): LabelState => (i < current.value ? 'past' : i === c
 /* Libellés */
 .label {
   transition:
-    fill 0.5s ease 0.3s,
+    fill 0.5s ease 0.1s,
     opacity 0.5s ease;
   font-weight: 600;
 }
@@ -608,6 +612,12 @@ const stateOf = (i: number): LabelState => (i < current.value ? 'past' : i === c
 .label.current {
   fill: #1e293b;
   font-weight: 800;
+}
+/* Erreur : la question sur laquelle l'utilisateur a échoué */
+.label.error {
+  fill: #fa2c36;
+  font-weight: 800;
+  stroke: rgba(0, 0, 0, 0.45);
 }
 
 @media (prefers-reduced-motion: reduce) {
