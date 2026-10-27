@@ -158,6 +158,7 @@
       </ol>
 
       <Beerglass
+        :broken="gameState === GAMESTATE.CHECKING && !isCorrect"
         class="hidden h-full w-full lg:block"
         :labels="stepLabels"
         :step="currentStep"

@@ -6,6 +6,8 @@ const props = defineProps<{
   labels: string[];
   /** Index du palier courant (0-based) */
   step: number;
+  /** Affiche un aspect de verre brisé (ex. : partie échouée) */
+  broken?: boolean;
 }>();
 
 // ---------- Géométrie (viewBox 0 0 200 500) ----------
@@ -30,6 +32,7 @@ const PROFILE_KEYS: [number, number][] = [
   [60, 455],
   [68, 474] // léger évasement du pied
 ];
+const RIM_HALF = PROFILE_KEYS[0][0]; // demi-largeur au bord supérieur
 
 function catmull(p0: number, p1: number, p2: number, p3: number, t: number) {
   const t2 = t * t;
@@ -70,6 +73,17 @@ const GLASS_PATH = (() => {
     `L${right.join(' L')} Z`
   );
 })();
+
+// Zone libre au-dessus du bord supérieur : c'est là que la mousse peut dépasser.
+// Plus large que le verre : les bosses des bords ne sont jamais coupées, même quand elles "respirent".
+const FOAM_DOME = (() => {
+  const w = RIM_HALF + 24;
+  const h = 30; // hauteur max de dépassement
+  return `M${CX - w} ${TOP} V${TOP - h} H${CX + w} V${TOP} Z`;
+})();
+
+// Contour sans la ligne du haut : la mousse peut dépasser, le bord supérieur est dessiné à part
+const GLASS_OUTLINE = GLASS_PATH.replace(/\s*Z$/, '');
 
 // Bord gauche du verre à la hauteur y (le bord droit est symétrique : 200 - x)
 const leftEdge = (y: number) => {
@@ -121,7 +135,8 @@ const levelStyle = computed(() => ({ transform: `translateY(${offset.value}px)` 
 
 const fullSurface = computed(() => surfaceY(n.value - 1));
 const foamTop = computed(() => fullSurface.value - 0.95 * band.value);
-const foamR = computed(() => Math.max(7, band.value * 0.3));
+const foamR = computed(() => Math.min(14, Math.max(7, band.value * 0.3)));
+const FOAM_OUTLINE = 2.5; // épaisseur du contour nuageux
 
 // Mousse : deux rangées de "nuages" (haut et bas) de même taille, autour d'un corps rectangulaire.
 // Les motifs sont décalés pour que le bas ne soit pas un simple miroir du haut.
@@ -129,27 +144,41 @@ const foamBumps = computed(() => {
   const r = foamR.value;
   const gap = r * 1.5;
   const bumps: { cx: number; cy: number; r: number; delay: number; dur: number }[] = [];
-  const row = (cy: number, startX: number, seed: number) => {
-    let k = 0;
-    for (let x = startX; x < 210; x += gap, k++) {
-      const rr = r * (0.85 + (((k * seed) % 10) / 10) * 0.35);
+  const radius = (k: number, seed: number) => r * (0.85 + (((k * seed) % 10) / 10) * 0.35);
+  const row = (cy: number, xs: number[], seed: number) => {
+    xs.forEach((x, k) => {
       bumps.push({
         cx: x,
         cy,
-        r: rr,
+        r: radius(k, seed),
         delay: -((k + seed) % 5) * 0.8,
         dur: 3.2 + ((k + seed) % 4) * 0.7
       });
-    }
+    });
   };
-  row(foamTop.value + 2, 8, 37); // haut
-  row(fullSurface.value + 2, 8 + gap / 2, 53); // bas, décalé d'une demi-bosse
+  // Haut : réparti d'un bord à l'autre du verre, les bosses extrêmes tangentes au bord
+  // (contour compris) pour que la mousse au-dessus du bord soit arrondie sur les côtés, pas coupée
+  const count = Math.ceil((2 * RIM_HALF) / gap);
+  const x0 = CX - RIM_HALF + radius(0, 37) + FOAM_OUTLINE;
+  const x1 = CX + RIM_HALF - radius(count, 37) - FOAM_OUTLINE;
+  row(
+    foamTop.value + 2,
+    Array.from({ length: count + 1 }, (_, k) => x0 + (k * (x1 - x0)) / count),
+    37
+  );
+  // Bas : décalé d'une demi-bosse, toujours dans le liquide (découpé par le verre)
+  const start = 8 + gap / 2;
+  row(
+    fullSurface.value + 2,
+    Array.from({ length: Math.ceil((210 - start) / gap) }, (_, k) => start + k * gap),
+    53
+  );
   return bumps;
 });
 
 // Couche 1 = contour nuageux, couche 2 = mousse blanche
 const foamLayers = [
-  { key: 'outline', grow: 2.5, fill: '#e6c27c' },
+  { key: 'outline', grow: FOAM_OUTLINE, fill: '#e6c27c' },
   { key: 'body', grow: 0, fill: '#fffdf7' }
 ];
 
@@ -173,6 +202,78 @@ const BUBBLES = [
 // Distance de montée = du fond jusqu'à la surface courante
 const rise = computed(() => `${Math.max(LEVEL_0 - 4 - surfaceY(current.value), 0)}px`);
 
+// ---------- Verre brisé ----------
+// Étoile de fissures générée une fois (pseudo-aléatoire fixe : toujours le même impact) :
+// fissures radiales + branches + anneaux discontinus + facettes de verre plus ou moins claires.
+const IMPACT = { x: 108, y: 215 };
+const RADIALS = 9;
+
+function mulberry32(seed: number) {
+  return () => {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const poly = (pts: [number, number][]) => `M${pts.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join(' L')}`;
+
+const CRACKS = (() => {
+  const rnd = mulberry32(11);
+  const radials: [number, number][][] = [];
+  const paths: string[] = [];
+
+  for (let k = 0; k < RADIALS; k++) {
+    let a = (k / RADIALS) * Math.PI * 2 + (rnd() - 0.5) * 0.35;
+    let r = 0;
+    const pts: [number, number][] = [[IMPACT.x, IMPACT.y]];
+    for (let s = 0; s < 6; s++) {
+      r += 16 + rnd() * 20;
+      a += (rnd() - 0.5) * 0.3;
+      pts.push([IMPACT.x + Math.cos(a) * r, IMPACT.y + Math.sin(a) * r]);
+    }
+    radials.push(pts);
+    paths.push(poly(pts));
+
+    // Petite branche qui part d'un point de la fissure
+    if (rnd() > 0.35) {
+      const from = pts[2 + Math.floor(rnd() * 2)];
+      const ba = a + (rnd() > 0.5 ? 1 : -1) * (0.5 + rnd() * 0.5);
+      const len = 18 + rnd() * 22;
+      paths.push(
+        poly([
+          from,
+          [from[0] + Math.cos(ba) * len * 0.5 + (rnd() - 0.5) * 4, from[1] + Math.sin(ba) * len * 0.5],
+          [from[0] + Math.cos(ba) * len, from[1] + Math.sin(ba) * len]
+        ])
+      );
+    }
+  }
+
+  // Anneaux irréguliers (avec des "trous" pour ne pas faire toile d'araignée)
+  [1, 3].forEach((idx, ri) => {
+    for (let k = 0; k < RADIALS; k++) {
+      if ((k + ri) % 3 === 2) continue;
+      paths.push(poly([radials[k][idx], radials[(k + 1) % RADIALS][idx]]));
+    }
+  });
+
+  // Facettes : quadrilatères entre deux fissures voisines, de clarté alternée
+  const shards: { d: string; o: number }[] = [];
+  [
+    [1, 3],
+    [3, 5]
+  ].forEach(([i0, i1], row) => {
+    for (let k = 0; k < RADIALS; k++) {
+      const a = radials[k];
+      const b = radials[(k + 1) % RADIALS];
+      shards.push({ d: `${poly([a[i0], a[i1], b[i1], b[i0]])} Z`, o: (k + row) % 2 ? 0.12 : 0.03 });
+    }
+  });
+
+  return { paths, shards };
+})();
+
 type LabelState = 'past' | 'current' | 'upcoming';
 const stateOf = (i: number): LabelState => (i < current.value ? 'past' : i === current.value ? 'current' : 'upcoming');
 </script>
@@ -181,12 +282,18 @@ const stateOf = (i: number): LabelState => (i < current.value ? 'past' : i === c
   <svg
     aria-hidden="true"
     class="beer-glass block"
+    overflow="visible"
     preserveAspectRatio="xMidYMid meet"
     viewBox="0 0 200 500"
   >
     <defs>
       <clipPath :id="`${uid}-clip`">
         <path :d="GLASS_PATH" />
+      </clipPath>
+      <!-- Mousse : même forme que le verre + une zone libre au-dessus du bord supérieur -->
+      <clipPath :id="`${uid}-foam-clip`">
+        <path :d="GLASS_PATH" />
+        <path :d="FOAM_DOME" />
       </clipPath>
       <linearGradient
         :id="`${uid}-beer`"
@@ -240,8 +347,21 @@ const stateOf = (i: number): LabelState => (i < current.value ? 'past' : i === c
           :style="{ animationDuration: `${b.dur}s`, animationDelay: `${b.delay}s` }"
         />
       </g>
+    </g>
 
-      <!-- Mousse -->
+    <!-- Bord supérieur du verre (dessiné derrière la mousse) -->
+    <line
+      stroke="rgba(255,255,255,0.85)"
+      stroke-linecap="round"
+      stroke-width="3"
+      :x1="CX - RIM_HALF"
+      :x2="CX + RIM_HALF"
+      :y1="TOP"
+      :y2="TOP"
+    />
+
+    <!-- Mousse : peut dépasser du haut du verre -->
+    <g :clip-path="`url(#${uid}-foam-clip)`">
       <g
         class="level"
         :style="levelStyle"
@@ -252,10 +372,10 @@ const stateOf = (i: number): LabelState => (i < current.value ? 'past' : i === c
         >
           <rect
             :fill="layer.fill"
-            :height="fullSurface - foamTop + 2 * layer.grow"
+            :height="fullSurface - foamTop + layer.grow"
             width="210"
             x="-5"
-            :y="foamTop + 2 - layer.grow"
+            :y="foamTop + 2"
           />
           <circle
             v-for="(b, i) in foamBumps"
@@ -269,7 +389,9 @@ const stateOf = (i: number): LabelState => (i < current.value ? 'past' : i === c
           />
         </g>
       </g>
+    </g>
 
+    <g :clip-path="`url(#${uid}-clip)`">
       <!-- Pied de verre épais -->
       <rect
         fill="rgba(255,255,255,0.22)"
@@ -286,11 +408,52 @@ const stateOf = (i: number): LabelState => (i < current.value ? 'past' : i === c
         :y1="LEVEL_0"
         :y2="LEVEL_0"
       />
+
+      <!-- Verre brisé : facettes + fissures (ombre portée puis trait clair) -->
+      <g
+        v-if="broken"
+        class="cracks"
+      >
+        <path
+          v-for="(sh, i) in CRACKS.shards"
+          :key="`s${i}`"
+          class="shard"
+          :d="sh.d"
+          fill="#fff"
+          :fill-opacity="sh.o"
+        />
+        <g
+          fill="none"
+          stroke-linejoin="round"
+        >
+          <path
+            v-for="(d, i) in CRACKS.paths"
+            :key="`u${i}`"
+            class="crack"
+            :d="d"
+            pathLength="1"
+            stroke="rgba(0,0,0,0.35)"
+            stroke-width="2.6"
+            :style="{ animationDelay: `${i * 0.012}s` }"
+            transform="translate(0.8 0.8)"
+          />
+          <path
+            v-for="(d, i) in CRACKS.paths"
+            :key="`c${i}`"
+            class="crack"
+            :d="d"
+            pathLength="1"
+            stroke="rgba(255,255,255,0.9)"
+            stroke-width="1.2"
+            :style="{ animationDelay: `${i * 0.012}s` }"
+          />
+        </g>
+      </g>
     </g>
 
     <!-- Contour du verre + reflet -->
     <path
-      :d="GLASS_PATH"
+      :d="GLASS_OUTLINE"
       fill="none"
       stroke="rgba(255,255,255,0.85)"
       stroke-linejoin="round"
@@ -396,6 +559,28 @@ const stateOf = (i: number): LabelState => (i < current.value ? 'past' : i === c
     transform: scale(1.14);
   }
 }
+
+/* Verre brisé : les fissures se dessinent, les facettes apparaissent */
+.crack {
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 1;
+  animation: crack-draw 0.4s ease-out forwards;
+}
+@keyframes crack-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.shard {
+  animation: shard-in 0.5s ease-out 0.15s forwards;
+  opacity: 0;
+}
+@keyframes shard-in {
+  to {
+    opacity: 1;
+  }
+}
+
 /* Libellés */
 .label {
   transition:
@@ -433,6 +618,14 @@ const stateOf = (i: number): LabelState => (i < current.value ? 'past' : i === c
   }
   .level {
     transition: none;
+  }
+  .crack {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  .shard {
+    animation: none;
+    opacity: 1;
   }
 }
 </style>
