@@ -23,7 +23,7 @@
             :disabled="gameState !== GAMESTATE.CHECKING || locked"
             title="Question suivante"
             type="button"
-            @click="nextQuestion"
+            @click="nextQuestion()"
           >
             <span class="material-symbols-outlined"> arrow_forward </span>
           </button>
@@ -175,6 +175,7 @@
 </template>
 
 <script setup lang="ts">
+import { useEventBus } from '@/composables/useEventBus';
 import { useSound } from '@/composables/useSound';
 import { DIFFICULTY } from '@/services/fetch-questions';
 import { useGlobalStore } from '@/stores/global';
@@ -182,6 +183,7 @@ import type { Question } from '@/types/question';
 import { pickRandom, shuffle } from '@/utils/array';
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
 const { preload, play } = useSound();
+const { on } = useEventBus();
 
 import Beerglass from '@/components/beerglass.vue';
 
@@ -290,6 +292,8 @@ onBeforeUnmount(() => {
   document.removeEventListener('keydown', onkeydown);
 });
 
+on('game:force-next-question', () => nextQuestion(true));
+
 function selectAnswer(index: number) {
   if (gameState.value === GAMESTATE.CHECKING || hiddenAnswers.value.includes(index)) return;
   if (selectedAnswer.value === index) {
@@ -311,9 +315,9 @@ function validate() {
   play(isCorrect.value ? 'success.mp3' : 'failure.mp3');
 }
 
-function nextQuestion() {
-  if (gameState.value !== GAMESTATE.CHECKING || locked.value) return;
-  // TODO: play('next.mp3');
+function nextQuestion(force = false) {
+  if (currentStep.value >= maxStep.value) return;
+  if (!force && (gameState.value !== GAMESTATE.CHECKING || locked.value)) return;
   resetQuestionState();
   currentStep.value++;
 }
