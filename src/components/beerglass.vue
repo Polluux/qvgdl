@@ -32,7 +32,7 @@ const PROFILE_KEYS: [number, number][] = [
   [60, 455],
   [68, 474] // léger évasement du pied
 ];
-const RIM_HALF = PROFILE_KEYS[0][0]; // demi-largeur au bord supérieur
+const RIM_HALF = PROFILE_KEYS[0]![0]; // demi-largeur au bord supérieur
 
 function catmull(p0: number, p1: number, p2: number, p3: number, t: number) {
   const t2 = t * t;
@@ -46,32 +46,32 @@ const PROFILE: [number, number][] = (() => {
   const pts: [number, number][] = [];
   const SAMPLES = 14;
   for (let i = 0; i < k.length - 1; i++) {
-    const p0 = k[Math.max(i - 1, 0)];
-    const p1 = k[i];
-    const p2 = k[i + 1];
-    const p3 = k[Math.min(i + 2, k.length - 1)];
+    const p0 = k[Math.max(i - 1, 0)]!;
+    const p1 = k[i]!;
+    const p2 = k[i + 1]!;
+    const p3 = k[Math.min(i + 2, k.length - 1)]!;
     for (let s = 0; s < SAMPLES; s++) {
       const t = s / SAMPLES;
       pts.push([catmull(p0[0], p1[0], p2[0], p3[0], t), catmull(p0[1], p1[1], p2[1], p3[1], t)]);
     }
   }
-  pts.push(k[k.length - 1]);
+  pts.push(k[k.length - 1]!);
   return pts;
 })();
 
 const f = (v: number) => v.toFixed(2);
 const GLASS_PATH = (() => {
-  const last = PROFILE[PROFILE.length - 1];
+  const last = PROFILE[PROFILE.length - 1]!;
   const left = PROFILE.map(([h, y]) => `${f(CX - h)} ${f(y)}`);
   const right = [...PROFILE].reverse().map(([h, y]) => `${f(CX + h)} ${f(y)}`);
   const foot = last[0];
-  return (
-    `M${left.join(' L')} ` +
-    `Q${f(CX - foot - 1)} ${BOTTOM} ${f(CX - foot + 9)} ${BOTTOM} ` +
-    `H${f(CX + foot - 9)} ` +
-    `Q${f(CX + foot + 1)} ${BOTTOM} ${f(CX + last[0])} ${f(last[1])} ` +
+  return [
+    `M${left.join(' L')}`,
+    `Q${f(CX - foot - 1)} ${BOTTOM} ${f(CX - foot + 9)} ${BOTTOM}`,
+    `H${f(CX + foot - 9)}`,
+    `Q${f(CX + foot + 1)} ${BOTTOM} ${f(CX + last[0])} ${f(last[1])}`,
     `L${right.join(' L')} Z`
-  );
+  ].join(' ');
 })();
 
 // Zone libre au-dessus du bord supérieur : c'est là que la mousse peut dépasser.
@@ -88,14 +88,14 @@ const GLASS_OUTLINE = GLASS_PATH.replace(/\s*Z$/, '');
 // Bord gauche du verre à la hauteur y (le bord droit est symétrique : 200 - x)
 const leftEdge = (y: number) => {
   for (let i = 1; i < PROFILE.length; i++) {
-    const [h0, y0] = PROFILE[i - 1];
-    const [h1, y1] = PROFILE[i];
+    const [h0, y0] = PROFILE[i - 1]!;
+    const [h1, y1] = PROFILE[i]!;
     if (y <= y1) {
       const t = y1 === y0 ? 0 : (y - y0) / (y1 - y0);
       return CX - (h0 + (h1 - h0) * Math.min(Math.max(t, 0), 1));
     }
   }
-  return CX - PROFILE[PROFILE.length - 1][0];
+  return CX - PROFILE[PROFILE.length - 1]![0];
 };
 
 // Reflet : suit le bord gauche, légèrement à l'intérieur
@@ -237,7 +237,7 @@ const CRACKS = (() => {
 
     // Petite branche qui part d'un point de la fissure
     if (rnd() > 0.35) {
-      const from = pts[2 + Math.floor(rnd() * 2)];
+      const from = pts[2 + Math.floor(rnd() * 2)]!;
       const ba = a + (rnd() > 0.5 ? 1 : -1) * (0.5 + rnd() * 0.5);
       const len = 18 + rnd() * 22;
       paths.push(
@@ -254,20 +254,22 @@ const CRACKS = (() => {
   [1, 3].forEach((idx, ri) => {
     for (let k = 0; k < RADIALS; k++) {
       if ((k + ri) % 3 === 2) continue;
-      paths.push(poly([radials[k][idx], radials[(k + 1) % RADIALS][idx]]));
+      paths.push(poly([radials[k]![idx]!, radials[(k + 1) % RADIALS]![idx]!]));
     }
   });
 
   // Facettes : quadrilatères entre deux fissures voisines, de clarté alternée
   const shards: { d: string; o: number }[] = [];
-  [
-    [1, 3],
-    [3, 5]
-  ].forEach(([i0, i1], row) => {
+  (
+    [
+      [1, 3],
+      [3, 5]
+    ] as const
+  ).forEach(([i0, i1], row) => {
     for (let k = 0; k < RADIALS; k++) {
-      const a = radials[k];
-      const b = radials[(k + 1) % RADIALS];
-      shards.push({ d: `${poly([a[i0], a[i1], b[i1], b[i0]])} Z`, o: (k + row) % 2 ? 0.12 : 0.03 });
+      const a = radials[k]!;
+      const b = radials[(k + 1) % RADIALS]!;
+      shards.push({ d: `${poly([a[i0]!, a[i1]!, b[i1]!, b[i0]!])} Z`, o: (k + row) % 2 ? 0.12 : 0.03 });
     }
   });
 
