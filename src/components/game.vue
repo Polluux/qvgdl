@@ -1,5 +1,5 @@
 <template>
-  <main class="grid min-h-dvh grid-cols-[minmax(0,1fr)_5rem] text-white md:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]">
+  <main class="grid min-h-dvh grid-cols-[minmax(0,1fr)_5rem] text-white sm:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]">
     <section class="@container mx-auto flex w-full max-w-5xl flex-col gap-5 px-4 py-6 sm:px-8 md:px-12">
       <header class="flex items-center justify-center gap-4 landscape:justify-between">
         <div
@@ -145,7 +145,7 @@
     </section>
 
     <aside class="sticky top-0 h-dvh self-start border-l border-white/10 bg-black/20 p-2 sm:p-4">
-      <ol class="flex h-full flex-col-reverse gap-1">
+      <ol class="flex h-full flex-col-reverse gap-1 lg:hidden">
         <li
           v-for="(label, i) in stepLabels"
           :key="label"
@@ -156,6 +156,19 @@
           {{ label }}
         </li>
       </ol>
+
+      <Beerglass
+        class="hidden h-full w-full lg:block"
+        :labels="stepLabels"
+        :step="currentStep"
+      />
+
+      <p
+        aria-live="polite"
+        class="sr-only"
+      >
+        Palier {{ currentStep + 1 }} sur {{ stepLabels.length }} : {{ stepLabels[currentStep] }}
+      </p>
     </aside>
   </main>
 </template>
@@ -168,6 +181,8 @@ import type { Question } from '@/types/question';
 import { pickRandom, shuffle } from '@/utils/array';
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
 const { preload, play } = useSound();
+
+import Beerglass from '@/components/beerglass.vue';
 
 const globalStore = useGlobalStore();
 
@@ -338,11 +353,15 @@ function answerClass(i: number) {
 }
 
 function stepClass(i: number) {
+  // Current step either red if invalid or white otherwise
   if (i === currentStep.value) {
-    if (gameState.value === GAMESTATE.CHECKING) return isCorrect.value ? 'scale-105 bg-emerald-500 shadow-lg' : 'scale-105 bg-red-500 shadow-lg';
-    return 'scale-105 bg-amber-300 text-slate-900 shadow-lg';
+    if (gameState.value === GAMESTATE.CHECKING && !isCorrect.value) return 'scale-105 bg-red-500 shadow-lg';
+    return 'scale-105 bg-white text-slate-900 shadow-lg';
   }
-  return i < currentStep.value ? 'bg-amber-500/60 text-white' : 'bg-white/10 text-white/50';
+  // Previous step is white if invalid, to enlight the current prize won
+  if (i === currentStep.value - 1 && gameState.value === GAMESTATE.CHECKING && !isCorrect.value) return 'bg-white text-slate-900';
+  // Other steps are either yellow or grey
+  return i < currentStep.value ? 'bg-amber-300 text-slate-900' : 'bg-white/10 text-white/50';
 }
 
 function onkeydown(event: KeyboardEvent) {

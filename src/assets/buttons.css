@@ -17,7 +17,7 @@ button {
     @apply hover:bg-white/20 active:bg-white/25;
 
     &:disabled {
-      opacity: 50%;
+      opacity: 20%;
       @apply bg-white/30;
     }
 
