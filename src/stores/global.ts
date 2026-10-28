@@ -8,7 +8,7 @@ export const useGlobalStore = defineStore('global', () => {
   // == Global State ==
   const isUnlocked = ref(false);
   const isGameActive = ref(false);
-  const muted = ref(false);
+  const muted = ref(import.meta.env.DEV === true); // Default muted for dev
   // == Loading State ==
   const loading = ref(false);
   const error = ref<string | null>(null);

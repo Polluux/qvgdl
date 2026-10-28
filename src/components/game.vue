@@ -221,7 +221,6 @@ const STEP_LABEL = [
 ];
 
 const modalInfo = useTemplateRef<HTMLDialogElement>('modalInfo');
-const nextQuestionButton = useTemplateRef<HTMLButtonElement>('nextQuestionButton');
 
 const questions = ref(
   Object.values(DIFFICULTY)
@@ -279,8 +278,7 @@ const locked = computed(() => {
 onMounted(() => {
   globalStore.setAsSeen([currentQuestion.value.id]);
 
-  preload('success.mp3');
-  preload('failure.mp3');
+  preload('glass_clink.mp3', 'glass_shatter.mp3');
 
   document.addEventListener('keydown', onkeydown);
 });
@@ -310,7 +308,7 @@ function resetQuestionState() {
 function validate() {
   if (gameState.value === GAMESTATE.CHECKING || hiddenAnswers.value === null) return;
   gameState.value = GAMESTATE.CHECKING;
-  play(isCorrect.value ? 'success.mp3' : 'failure.mp3');
+  play(isCorrect.value ? 'glass_clink.mp3' : 'glass_shatter.mp3');
 }
 
 function nextQuestion(force = false) {

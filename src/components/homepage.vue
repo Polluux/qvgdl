@@ -39,14 +39,14 @@
 
     <p
       v-if="globalStore.error"
-      class="text-sm px-5 py-2 border rounded-md border-red-700/50 bg-red-500/50 text-white"
+      class="rounded-md border border-red-700/50 bg-red-500/50 px-5 py-2 text-sm text-white"
     >
       {{ globalStore.error }}
     </p>
 
     <div
       aria-label="QR code vers la page de contact"
-      class="absolute right-6 bottom-6 hidden h-32 w-32 items-center justify-center rounded-xl border-2 border-dashed border-slate-300 p-1 text-center text-xs text-slate-400 landscape:flex md:h-36 md:w-36"
+      class="absolute right-6 bottom-6 hidden h-32 w-32 items-center justify-center rounded-xl border-2 border-dashed border-slate-300 p-1 text-center text-xs text-slate-400 md:h-36 md:w-36 landscape:flex"
     >
       QR code
     </div>
@@ -54,17 +54,49 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onBeforeUnmount, onMounted, watch } from 'vue';
 import { useGlobalStore } from '@/stores/global';
-import { useSound } from '@/composables/useSound';
+import { useSound, type SoundLoop } from '@/composables/useSound';
 
 const globalStore = useGlobalStore();
-const { preload, play } = useSound();
+const { preload, play, playLoop } = useSound();
 
-onMounted(() => preload('start.mp3'));
+let musicLoopController: null | SoundLoop = null;
+
+onMounted(() => {
+  preload('waiting_elevator.mp3', 'open_bottle.mp3');
+
+  musicLoopController = playLoop('waiting_elevator.mp3');
+});
+
+onBeforeUnmount(() => {
+  musicLoopController?.stop();
+});
 
 function start() {
-  play('start.mp3', 0.6);
+  play('open_bottle.mp3', 0.6);
   globalStore.isGameActive = true;
 }
+
+watch(
+  () => globalStore.isGameActive,
+  (newV) => {
+    if (newV) {
+      musicLoopController?.pause();
+    } else if (!globalStore.muted) {
+      musicLoopController?.resume();
+    }
+  }
+);
+
+watch(
+  () => globalStore.muted,
+  (newV) => {
+    if (newV) {
+      musicLoopController?.pause();
+    } else if (!globalStore.isGameActive) {
+      musicLoopController?.resume();
+    }
+  }
+);
 </script>
