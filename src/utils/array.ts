@@ -8,8 +8,3 @@ export function shuffle<T>(array: readonly T[]): T[] {
 
   return result;
 }
-
-export function pickRandom<T>(array: readonly T[]): T | undefined {
-  if (array.length === 0) return undefined;
-  return array[Math.floor(Math.random() * array.length)];
-}

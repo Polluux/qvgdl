@@ -30,7 +30,6 @@
           <button
             aria-label="Changer la question"
             class="btn-glass btn-icon size-12"
-            :disabled="!replacementPool.length"
             title="Changer la question"
             type="button"
             @click="changeCurrentQuestion"
@@ -179,8 +178,7 @@ import { useEventBus } from '@/composables/useEventBus';
 import { useSound } from '@/composables/useSound';
 import { DIFFICULTY } from '@/services/fetch-questions';
 import { useGlobalStore } from '@/stores/global';
-import type { Question } from '@/types/question';
-import { pickRandom, shuffle } from '@/utils/array';
+import { shuffle } from '@/utils/array';
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
 const { preload, play } = useSound();
 const { on } = useEventBus();
@@ -221,15 +219,13 @@ const STEP_LABEL = [
 const modalInfo = useTemplateRef<HTMLDialogElement>('modalInfo');
 
 const questions = ref(
-  Object.values(DIFFICULTY).flatMap((diff) => {
-    return shuffle((JSON.parse(JSON.stringify(globalStore.questions)) as Question[]).filter((q) => q.difficulty === diff))
-      .slice(0, NB_QUESTIONS_PER_DIFFICULTY[diff as DIFFICULTY])
-      .map((q) => {
-        return { ...q, answers: shuffle(q.answers) };
-      });
-  })
+  Object.values(DIFFICULTY)
+    // Difficulty being an enum, filter to iterate
+    .filter((key): key is DIFFICULTY => !isNaN(Number(key)))
+    .flatMap((diff) => {
+      return globalStore.getQuestions(diff, NB_QUESTIONS_PER_DIFFICULTY[diff]);
+    })
 );
-const discardedIds = ref<string[]>([]); // Questions discarded through action "change current question"
 const selectedAnswer = ref<number | null>(null);
 const hiddenAnswers = ref<number[]>([]); // Used only when using split joker
 const currentStep = ref(0);
@@ -265,12 +261,6 @@ const maxStep = computed(() => questions.value.length - 1);
 const stepLabels = computed(() => STEP_LABEL.slice(0, questions.value.length));
 const currentQuestion = computed(() => questions.value[currentStep.value]!);
 
-// Used when trying to change the current question
-const replacementPool = computed(() => {
-  const taken = new Set([...questions.value.map((q) => q.id), ...discardedIds.value]);
-  return globalStore.questions.filter((q) => q.difficulty === currentQuestion.value?.difficulty && !taken.has(q.id));
-});
-
 const isCorrect = computed(() => selectedAnswer.value !== null && !!currentQuestion.value?.answers[selectedAnswer.value]?.correct);
 const locked = computed(() => {
   // Game is locked when we are checking results
@@ -282,6 +272,8 @@ const locked = computed(() => {
 });
 
 onMounted(() => {
+  globalStore.setAsSeen([currentQuestion.value.id]);
+
   preload('success.mp3');
   preload('failure.mp3');
 
@@ -307,6 +299,7 @@ function resetQuestionState() {
   selectedAnswer.value = null;
   hiddenAnswers.value = [];
   gameState.value = GAMESTATE.PLAYING;
+  globalStore.setAsSeen([currentQuestion.value.id]);
 }
 
 function validate() {
@@ -318,16 +311,20 @@ function validate() {
 function nextQuestion(force = false) {
   if (currentStep.value >= maxStep.value) return;
   if (!force && (gameState.value !== GAMESTATE.CHECKING || locked.value)) return;
-  resetQuestionState();
   currentStep.value++;
+  resetQuestionState();
 }
 
 function changeCurrentQuestion() {
-  const newQuestion = pickRandom(replacementPool.value);
-  if (!newQuestion) return;
+  const newQ = globalStore.getQuestions(
+    currentQuestion.value.difficulty,
+    1,
+    questions.value.map((q) => q.id)
+  );
 
-  discardedIds.value.push(currentQuestion.value!.id);
-  questions.value.splice(currentStep.value, 1, { ...newQuestion, answers: shuffle(newQuestion.answers) });
+  if (!newQ.length) return;
+
+  questions.value.splice(currentStep.value, 1, newQ[0]!);
 
   resetQuestionState();
 }
