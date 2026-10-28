@@ -1,7 +1,8 @@
 <template>
-  <div class="fixed top-2 left-2 grid gap-2">
+  <div class="fixed top-2 left-2 z-20 grid gap-2">
     <button
       class="btn-glass btn-icon size-10"
+      :title="isOpen ? 'Fermer le menu' : 'Ouvrir le menu'"
       type="button"
       @click="isOpen = !isOpen"
     >
@@ -18,6 +19,7 @@
         <div class="grid gap-2">
           <button
             class="btn-glass btn-icon size-10"
+            :title="globalStore.muted ? 'Activer le son' : 'Couper le son'"
             type="button"
             @click="globalStore.muted = !globalStore.muted"
           >
@@ -26,6 +28,7 @@
           <button
             v-if="globalStore.isGameActive"
             class="btn-glass btn-icon size-10"
+            title="Passer à la question suivante"
             type="button"
             @click="forceNextQuestion"
           >

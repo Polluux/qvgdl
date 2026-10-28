@@ -3,6 +3,8 @@
     <Lockscreen v-if="!globalStore.isUnlocked" />
 
     <template v-else>
+      <ConfigMenu />
+
       <div
         aria-hidden
         class="bubble-mesh fixed inset-0 -z-20"
@@ -24,8 +26,6 @@
         <Game v-else> </Game>
       </Transition>
     </template>
-
-    <ConfigMenu />
   </div>
 </template>
 

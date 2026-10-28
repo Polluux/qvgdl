@@ -17,6 +17,7 @@
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex gap-2">
           <button
+            id="next-question"
             aria-label="Question suivante"
             class="btn-glass btn-icon size-12"
             :class="{ 'animate-pulse bg-indigo-500!': gameState === GAMESTATE.CHECKING && !locked }"
@@ -28,6 +29,7 @@
             <span class="material-symbols-outlined"> arrow_forward </span>
           </button>
           <button
+            id="change-question"
             aria-label="Changer la question"
             class="btn-glass btn-icon size-12"
             title="Changer la question"
@@ -37,6 +39,7 @@
             <span class="material-symbols-outlined"> refresh </span>
           </button>
           <button
+            id="back-home"
             aria-label="Retour à l'accueil"
             class="btn-glass btn-icon size-12"
             title="Retour à l'accueil"
@@ -128,6 +131,7 @@
           class="hex-row hex-row-stretch"
         >
           <button
+            :id="`answer_${i}`"
             class="hex justify-start self-stretch text-left text-base wrap-anywhere sm:text-lg"
             :class="answerClass(i)"
             :disabled="gameState === GAMESTATE.CHECKING || hiddenAnswers.includes(i)"
@@ -217,6 +221,7 @@ const STEP_LABEL = [
 ];
 
 const modalInfo = useTemplateRef<HTMLDialogElement>('modalInfo');
+const nextQuestionButton = useTemplateRef<HTMLButtonElement>('nextQuestionButton');
 
 const questions = ref(
   Object.values(DIFFICULTY)
@@ -371,18 +376,44 @@ function onkeydown(event: KeyboardEvent) {
 
   if (['Digit1', 'Numpad1'].includes(event.code) || ['a'].includes(event.key)) {
     selectAnswer(0);
+    regainFocus(0);
   }
   if (['Digit2', 'Numpad2'].includes(event.code) || ['b'].includes(event.key)) {
     selectAnswer(1);
+    regainFocus(1);
   }
   if (['Digit3', 'Numpad3'].includes(event.code) || ['c'].includes(event.key)) {
     selectAnswer(2);
+    regainFocus(2);
   }
   if (['Digit4', 'Numpad4'].includes(event.code) || ['d'].includes(event.key)) {
     selectAnswer(3);
+    regainFocus(3);
   }
   if (['Space', 'Enter'].includes(event.code)) {
     nextQuestion();
+    regainFocus();
   }
+}
+
+function regainFocus(answerIndex?: number) {
+  // If focus has been removed, gain focus as following order :
+  // Answer (playing) -> Next Question (is correct) -> Home (game over)
+  setTimeout(() => {
+    if (answerIndex !== undefined) {
+      document.getElementById(`answer_${answerIndex}`)?.focus();
+    }
+
+    const active = document.activeElement as HTMLElement | null;
+    const hasLostFocus = !active || active === document.body || !active.isConnected || active.matches(':disabled');
+    if (!hasLostFocus) return;
+
+    const btns = document.querySelectorAll('button[id^=answer_]:not(:disabled)');
+    if (btns.length) {
+      (btns[0] as HTMLElement)!.focus({ focusVisible: true });
+    } else {
+      (document.querySelector('button[id=next-question]:not(:disabled),button[id=back-home]:not(:disabled)') as HTMLElement)?.focus({ focusVisible: true });
+    }
+  }, 200);
 }
 </script>
