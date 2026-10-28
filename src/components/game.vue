@@ -1,12 +1,20 @@
 <template>
   <main class="grid min-h-dvh grid-cols-[minmax(0,1fr)_5rem] text-white sm:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]">
-    <section class="@container mx-auto flex w-full max-w-5xl flex-col gap-5 px-4 py-6 sm:px-8 md:px-12">
+    <section class="@container mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-6 sm:px-8 md:px-12">
       <header class="flex items-center justify-center gap-4 landscape:justify-between">
-        <div
-          class="hidden size-[30dvh] shrink-0 items-center justify-center rounded-xl border-2 border-dashed border-white/30 text-xs text-white/50 landscape:flex"
+        <a
+          aria-label="QR code vers la page de contact"
+          class="hidden size-[25dvh] shrink-0 overflow-hidden rounded-xl landscape:flex"
+          href="https://linktr.ee/sonerezh"
+          rel="noopener noreferrer"
+          target="_blank"
         >
-          QR code
-        </div>
+          <img
+            alt="Qr code"
+            role="img"
+            src="/qr-code.svg"
+          />
+        </a>
         <div
           class="flex aspect-3/2 w-full max-w-[25dvh] items-center justify-center rounded-xl border-2 border-dashed border-white/30 text-xs text-white/50 sm:max-w-[35dvh] md:max-w-[45dvh]"
         >
@@ -79,7 +87,7 @@
       </div>
 
       <article class="hex-row hex-row-stretch">
-        <div class="hex flex flex-col items-start text-xl wrap-anywhere sm:text-2xl">
+        <div class="hex flex flex-col items-start text-xl wrap-anywhere sm:text-2xl lg:text-3xl">
           <div class="flex w-full justify-between gap-4">
             <p class="mb-2 text-sm tracking-wide text-white/60 uppercase">Question {{ currentStep + 1 }} / {{ questions.length }}</p>
             <button
@@ -93,7 +101,7 @@
               i
             </button>
           </div>
-          <p class="text-xl font-semibold sm:text-2xl">{{ currentQuestion.text }}</p>
+          <p class="text-xl font-semibold sm:text-2xl lg:text-3xl">{{ currentQuestion.text }}</p>
 
           <dialog
             id="modal-info"
@@ -132,7 +140,7 @@
         >
           <button
             :id="`answer_${i}`"
-            class="hex justify-start self-stretch text-left text-base wrap-anywhere sm:text-lg"
+            class="hex justify-start self-stretch text-left text-base wrap-anywhere sm:text-lg lg:text-2xl"
             :class="answerClass(i)"
             :disabled="gameState === GAMESTATE.CHECKING || hiddenAnswers.includes(i)"
             type="button"

@@ -44,12 +44,19 @@
       {{ globalStore.error }}
     </p>
 
-    <div
+    <a
       aria-label="QR code vers la page de contact"
-      class="absolute right-6 bottom-6 hidden h-32 w-32 items-center justify-center rounded-xl border-2 border-dashed border-slate-300 p-1 text-center text-xs text-slate-400 md:h-36 md:w-36 landscape:flex"
+      class="absolute right-6 bottom-6 hidden size-32 items-center justify-center overflow-hidden rounded-xl md:size-40 lg:size-50 landscape:flex"
+      href="https://linktr.ee/sonerezh"
+      rel="noopener noreferrer"
+      target="_blank"
     >
-      QR code
-    </div>
+      <img
+        alt="Qr code"
+        role="img"
+        src="/qr-code.svg"
+      />
+    </a>
   </main>
 </template>
 
