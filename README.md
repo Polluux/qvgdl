@@ -34,8 +34,9 @@ Les données sont stockées dans un document GoogleSheet au format suivant :
 | q3       | rc               | ri1                  | ri2                  | ri3                  | Difficile  | Note3 | [ ]   |
 | q4       | rc               | ri1                  | ri2                  | ri3                  | Expert     |       | [ ]   |
 
-La difficulté doit impérativement contenir une valeur parmi : `Facile`, `Moyen`, `Difficile`, `Expert`.
-Actif est un boolean (via le format `Case à cocher`).
+`Difficulté` doit impérativement contenir une valeur parmi : `Facile`, `Moyen`, `Difficile`, `Expert`.
+
+`Actif` est un boolean (via le format `Case à cocher`).
 
 ## Notes d'utilisation :
 
