@@ -192,6 +192,7 @@ import { DIFFICULTY } from '@/services/fetch-questions';
 import { useGlobalStore } from '@/stores/global';
 import { shuffle } from '@/utils/array';
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
+import confetti from '@hiseb/confetti';
 const { preload, play } = useSound();
 const { on } = useEventBus();
 
@@ -283,6 +284,8 @@ const locked = computed(() => {
   );
 });
 
+const confettiTimeout = ref<null | NodeJS.Timeout>(null);
+
 onMounted(() => {
   globalStore.setAsSeen([currentQuestion.value.id]);
 
@@ -293,6 +296,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', onkeydown);
+  if (confettiTimeout.value) clearTimeout(confettiTimeout.value);
 });
 
 on('game:force-next-question', () => nextQuestion(true));
@@ -317,6 +321,7 @@ function validate() {
   if (gameState.value === GAMESTATE.CHECKING || hiddenAnswers.value === null) return;
   gameState.value = GAMESTATE.CHECKING;
   play(isCorrect.value ? 'glass_clink.mp3' : 'glass_shatter.mp3');
+  if (isCorrect.value && currentStep.value === maxStep.value) launchConfetti();
 }
 
 function nextQuestion(force = false) {
@@ -421,5 +426,17 @@ function regainFocus(answerIndex?: number) {
       (document.querySelector('button[id=next-question]:not(:disabled),button[id=back-home]:not(:disabled)') as HTMLElement)?.focus({ focusVisible: true });
     }
   }, 200);
+}
+
+function launchConfetti() {
+  if (gameState.value !== GAMESTATE.CHECKING && !locked.value) {
+    if (confettiTimeout.value) clearTimeout(confettiTimeout.value);
+  } else {
+    const x = window.innerWidth * Math.random();
+    const y = window.innerHeight * Math.random();
+    confetti({ position: { x, y } });
+
+    confettiTimeout.value = setTimeout(launchConfetti, 500 + 500 * Math.random());
+  }
 }
 </script>
