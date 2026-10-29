@@ -172,6 +172,7 @@
         :broken="gameState === GAMESTATE.CHECKING && !isCorrect"
         class="hidden h-full w-full lg:block"
         :labels="stepLabels"
+        :overflowing="gameState === GAMESTATE.CHECKING && isCorrect && currentStep === maxStep"
         :step="currentStep"
       />
 
@@ -318,7 +319,7 @@ function resetQuestionState() {
 }
 
 function validate() {
-  if (gameState.value === GAMESTATE.CHECKING || hiddenAnswers.value === null) return;
+  if (gameState.value === GAMESTATE.CHECKING) return;
   gameState.value = GAMESTATE.CHECKING;
   play(isCorrect.value ? 'glass_clink.mp3' : 'glass_shatter.mp3');
   if (isCorrect.value && currentStep.value === maxStep.value) launchConfetti();
