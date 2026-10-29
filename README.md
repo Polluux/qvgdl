@@ -1,6 +1,6 @@
 # Qui veux gagner des litrons ?
 
-Une application développée pour le compte de l'association [Sonerezh44](https://linktr.ee/sonerezh).
+Une application développée pour le compte de l'association [Sonerezh44](https://linktr.ee/sonerezh) et auto hébergée via [Github Pages](https://polluux.github.io/qvgdl/).
 
 ## Stack :
 
