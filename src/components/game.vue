@@ -290,7 +290,7 @@ const confettiTimeout = ref<null | NodeJS.Timeout>(null);
 onMounted(() => {
   globalStore.setAsSeen([currentQuestion.value.id]);
 
-  preload('glass_clink.mp3', 'glass_shatter.mp3');
+  preload('glass_clink.mp3', 'glass_shatter.mp3', 'beer_pour.mp3', 'firework.mp3', 'trumpet.mp3');
 
   document.addEventListener('keydown', onkeydown);
 });
@@ -322,13 +322,17 @@ function validate() {
   if (gameState.value === GAMESTATE.CHECKING) return;
   gameState.value = GAMESTATE.CHECKING;
   play(isCorrect.value ? 'glass_clink.mp3' : 'glass_shatter.mp3');
-  if (isCorrect.value && currentStep.value === maxStep.value) launchConfetti();
+  if (isCorrect.value && currentStep.value === maxStep.value) {
+    launchConfetti();
+    play('trumpet.mp3');
+  }
 }
 
 function nextQuestion(force = false) {
   if (currentStep.value >= maxStep.value) return;
   if (!force && (gameState.value !== GAMESTATE.CHECKING || locked.value)) return;
   currentStep.value++;
+  if (!force) play('beer_pour.mp3');
   resetQuestionState();
 }
 
@@ -436,6 +440,7 @@ function launchConfetti() {
     const x = window.innerWidth * Math.random();
     const y = window.innerHeight * Math.random();
     confetti({ position: { x, y } });
+    play('firework.mp3');
 
     confettiTimeout.value = setTimeout(launchConfetti, 500 + 500 * Math.random());
   }
